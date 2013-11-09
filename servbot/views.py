@@ -2,6 +2,7 @@
 from servbot import app
 from flask import render_template
 import helpers
+from flask.ext.pymongo import PyMongo
 import pymongo
 from pymongo import MongoClient
 import json
@@ -17,36 +18,105 @@ def index():
 @app.route('/restaurants/', methods=['GET', 'POST'])
 def restaurantList():
 	
-#app.config['MONGO_URI'] = 'mongodb://admin:admin@ds053678.mongolab.com:53678/servbot'
-#app.config['MONGO_DBNAME'] = 'restaurants'
-#app.config['MONGO_USERNAME'] = 'admin'
-#app.config['MONGO_PASSWORD'] = 'admin'
-
-#mongo = PyMongo(app, config_prefix = 'MONGO');
 	client = MongoClient('mongodb://admin:admin@ds053678.mongolab.com:53678/servbot')
 	db = client.servbot
 
-#db.restaurants.insert({"name" : '',
-#"tables" : [{
-#	"number" : '',
-#	"orders" : []
-#		}
-#	]
-#})
-#	db.restaurants.update(
-#		{ "name" : ""
-#		},
-#		{ "$push" : {"tables.0.orders" : "woohoo"}
-#		}
-#	)
 	index = 0
-	cursor = db.restaurants.find().sort("name", 1)
+	cursor = db.restaurants.find()
 	nameList = []
 	for v in cursor:
-	#	print v['name']
+		print v['name']
 		nameList.append(v['name'])
 
-	#for greg in nameList:
-	#	print ("%s" % greg)
+	for greg in nameList:
+		print ("%s" % greg)
 
-	return json.dumps(nameList)
+	return json.dumps(nameList);
+
+@app.route('/restaurants/<restaurant>/<number>', methods=['get', 'post'])
+def createTable(restaurant, number):
+ 
+	client = MongoClient('mongodb://admin:admin@ds053678.mongolab.com:53678/servbot')
+	db = client.servbot
+
+	db.tables.insert({"owner" : 'TGI Fridays',
+		"number" : number,
+		"orders" : []
+})
+	return json.dumps(db.tables.find_one({"restaurant" : "TGI Fridays", "number" : number})["number"])
+
+
+@app.route('/order/', methods=['get', 'post'])
+def addorders():
+ 
+	client = MongoClient('mongodb://admin:admin@ds053678.mongolab.com:53678/servbot')
+	db = client.servbot
+	price = db.tables.find({"number" : 2, "owner" : "TGI Fridays"})[0]["price"]
+	print price
+	price += db.menus.find({"owner" : "TGI Fridays", "number" : 3})[0]["price"]
+	print price
+	db.tables.update(
+		{"number" : 2, "owner" : "TGI Fridays"},
+		{ "$push" : {"orders" : "woohoo"},
+		}
+	)
+
+	db.tables.update(
+		{"number" : 2, "owner" : "TGI Fridays"},
+		{ "$set" : {"price" : price},
+		}
+	)
+	return peekOrder()	
+
+
+@app.route('/peekOrder/', methods=['get', 'post'])
+def peekOrder():
+ 
+	client = MongoClient('mongodb://admin:admin@ds053678.mongolab.com:53678/servbot')
+	db = client.servbot
+ 	return json.dumps(db.tables.find_one({'owner' : "TGI Fridays", 'number': 2})["orders"])
+
+
+
+@app.route('/insertToMenu/', methods=['get', 'post'])
+def addMenus():
+ 
+	client = MongoClient('mongodb://admin:admin@ds053678.mongolab.com:53678/servbot')
+	db = client.servbot
+
+	db.menus.insert({"owner" : 'TGI Fridays',
+		"number" : 3,
+		"description" : "ribs",
+		"price" : 13.99
+})
+	return json.dumps(db.menus.find_one({"owner" : 'TGI Fridays', "number" : 3})["description"])
+
+
+@app.route('/menus/', methods=['get', 'post'])
+def getMenus():
+ 	client = MongoClient('mongodb://admin:admin@ds053678.mongolab.com:53678/servbot')
+	db = client.servbot
+
+	menu = []
+	cursor2 = db.menus.find({"owner" : 'TGI Fridays'}).sort("number" , 1)
+	for c in cursor2:
+		menu.append(c["description"])
+ 	return json.dumps(menu)
+
+@app.route('/getPrice/', methods=['get', 'post'])
+def getPrice():
+ 	client = MongoClient('mongodb://admin:admin@ds053678.mongolab.com:53678/servbot')
+	db = client.servbot
+
+	cursor4 = db.menus.find_one({"owner" : 'TGI Fridays'})
+ 	return json.dumps(cursor4["price"])
+
+
+
+@app.route('/checkoutPrice/', methods=['get', 'post'])
+def checkoutPrice():
+ 	client = MongoClient('mongodb://admin:admin@ds053678.mongolab.com:53678/servbot')
+	db = client.servbot
+ 	return json.dumps(db.tables.find_one({"number" : 2, "owner" : "TGI Fridays"})["price"])
+
+

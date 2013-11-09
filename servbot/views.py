@@ -34,11 +34,11 @@ def createTable(restaurant, number):
 	client = MongoClient('mongodb://admin:admin@ds053678.mongolab.com:53678/servbot')
 	db = client.servbot
 
-	db.tables.insert({"owner" : 'TGI Fridays',
+	db.tables.insert({"owner" : restaurant,
 		"number" : number,
 		"orders" : []
 })
-	return json.dumps(db.tables.find_one({"restaurant" : "TGI Fridays", "number" : number})["number"])
+	return json.dumps(db.tables.find_one({"owner" : restaurant, "number" : number})["number"])
 
 
 @app.route('/order/', methods=['get', 'post'])

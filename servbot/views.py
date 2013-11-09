@@ -2,7 +2,6 @@
 from servbot import app
 from flask import render_template
 import helpers
-from flask.ext.pymongo import PyMongo
 import pymongo
 from pymongo import MongoClient
 import json
@@ -11,7 +10,7 @@ import json
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	return render_template('landing.html');
+	return render_template('landing2.html');
 
 
 

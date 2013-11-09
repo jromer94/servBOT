@@ -6,4 +6,4 @@ import helpers
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	return "hello World"
+	return render_template('landing.html');

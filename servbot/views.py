@@ -1,8 +1,7 @@
 
 from servbot import app
-#from flask import render_template
+from flask import render_template
 import helpers
-from flask.ext.pymongo import PyMongo
 import pymongo
 from pymongo import MongoClient
 import json
@@ -44,10 +43,10 @@ def restaurantList():
 	cursor = db.restaurants.find().sort("name", 1)
 	nameList = []
 	for v in cursor:
-		print v['name']
+	#	print v['name']
 		nameList.append(v['name'])
 
-	for greg in nameList:
-		print ("%s" % greg)
+	#for greg in nameList:
+	#	print ("%s" % greg)
 
 	return json.dumps(nameList)

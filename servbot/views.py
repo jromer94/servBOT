@@ -25,11 +25,7 @@ def restaurantList():
 	cursor = db.restaurants.find()
 	nameList = []
 	for v in cursor:
-		print v['name']
 		nameList.append(v['name'])
-
-	for greg in nameList:
-		print ("%s" % greg)
 
 	return json.dumps(nameList);
 
